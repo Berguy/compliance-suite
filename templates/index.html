@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<div class="page-header">
+    <h2>Dashboard</h2>
+    <p>Visão geral das auditorias de conformidade</p>
+</div>
+
+<div class="kpi-grid">
+    <div class="kpi primaria">
+        <div class="kpi-numero">{{ total_clientes }}</div>
+        <div class="kpi-rotulo">Clientes cadastrados</div>
+    </div>
+    <div class="kpi primaria">
+        <div class="kpi-numero">{{ total_auditorias }}</div>
+        <div class="kpi-rotulo">Auditorias realizadas</div>
+    </div>
+    <div class="kpi critico">
+        <div class="kpi-numero">{{ total_criticos }}</div>
+        <div class="kpi-rotulo">Achados críticos (total)</div>
+    </div>
+    <div class="kpi alto">
+        <div class="kpi-numero">{{ total_altos }}</div>
+        <div class="kpi-rotulo">Achados altos (total)</div>
+    </div>
+</div>
+
+<div class="flex justify-between" style="margin-bottom: 16px;">
+    <h3 style="font-size: 16px; font-weight: 600;">Auditorias recentes</h3>
+    <a href="/nova-auditoria" class="btn btn-primario">+ Nova Auditoria</a>
+</div>
+
+<div class="card">
+    {% if recentes %}
+    <table class="tabela">
+        <thead>
+            <tr><th>Data</th><th>Cliente</th><th>Achados</th><th>Críticos</th><th>Altos</th><th>PDF</th></tr>
+        </thead>
+        <tbody>
+            {% for a in recentes %}
+            <tr>
+                <td>{{ a.data[:10] }}</td>
+                <td>{{ a.cliente_nome }}</td>
+                <td>{{ a.total_findings }}</td>
+                <td>{% if a.criticos > 0 %}<span class="badge badge-critico">{{ a.criticos }}</span>{% else %}—{% endif %}</td>
+                <td>{% if a.altos > 0 %}<span class="badge badge-alto">{{ a.altos }}</span>{% else %}—{% endif %}</td>
+                <td><a href="/auditorias/{{ a.id }}/pdf" target="_blank" class="btn btn-secundario" style="padding: 4px 12px; font-size: 12px;">Abrir</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="vazio">
+        Nenhuma auditoria realizada ainda.<br>
+        <a href="/nova-auditoria" class="btn btn-primario mt-16">Realizar primeira auditoria</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

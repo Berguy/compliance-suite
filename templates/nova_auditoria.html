@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<div class="page-header">
+    <h2>Nova Auditoria</h2>
+    <p>Selecione o projeto, configure os dados e execute</p>
+</div>
+
+<div class="card" style="max-width: 700px;">
+    <div class="form-group">
+        <label>Pasta ou arquivo do projeto</label>
+        <input type="text" id="pasta" placeholder="C:\projetos\meu-projeto ou ./codigo.py">
+        <div class="hint">Cole o caminho completo da pasta ou arquivo que deseja auditar</div>
+    </div>
+    <div class="form-group">
+        <label>Cliente</label>
+        <select id="cliente-select">
+            <option value="">— Selecionar cliente —</option>
+            {% for c in clientes %}
+            <option value="{{ c.id }}" data-nome="{{ c.nome }}">{{ c.nome }}</option>
+            {% endfor %}
+            <option value="novo">+ Novo cliente (digitar nome)</option>
+        </select>
+    </div>
+    <div class="form-group" id="campo-nome-manual" style="display: none;">
+        <label>Nome do cliente</label>
+        <input type="text" id="cliente-nome" placeholder="Empresa Exemplo Ltda">
+    </div>
+    <div class="form-group">
+        <label>Auditor</label>
+        <input type="text" id="auditor" value="{{ settings.auditor }}">
+    </div>
+    <div class="form-group">
+        <label>Escopo da auditoria</label>
+        <input type="text" id="escopo" value="{{ settings.escopo_padrao }}">
+    </div>
+    <button class="btn btn-primario" id="btn-executar" onclick="executar()">🔍 Executar Auditoria</button>
+</div>
+
+<div class="resultado" id="resultado">
+    <div class="card" style="max-width: 700px;" id="resultado-card"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function executar() {
+    const pasta = document.getElementById('pasta').value.trim();
+    const clienteSelect = document.getElementById('cliente-select');
+    const clienteId = clienteSelect.value;
+    let clienteNome = '';
+    if (clienteId === 'novo') {
+        clienteNome = document.getElementById('cliente-nome').value.trim();
+    } else {
+        clienteNome = clienteSelect.options[clienteSelect.selectedIndex].dataset.nome;
+    }
+    const auditor = document.getElementById('auditor').value.trim();
+    const escopo = document.getElementById('escopo').value.trim();
+
+    if (!pasta) { alert('Informe o caminho da pasta ou arquivo.'); return; }
+    if (!clienteNome) { alert('Selecione ou informe o cliente.'); return; }
+    if (!auditor) { alert('Informe o nome do auditor.'); return; }
+
+    const overlay = document.getElementById('overlay');
+    const overlayTexto = document.getElementById('overlay-texto');
+    overlay.classList.add('ativo');
+    overlayTexto.textContent = 'Escaneando código-fonte...';
+    document.getElementById('btn-executar').disabled = true;
+
+    fetch('/api/executar-auditoria', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pasta, cliente_id: clienteId, cliente_nome: clienteNome, auditor, escopo })
+    })
+    .then(r => r.json())
+    .then(data => {
+        overlay.classList.remove('ativo');
+        document.getElementById('btn-executar').disabled = false;
+        const resultado = document.getElementById('resultado');
+        const card = document.getElementById('resultado-card');
+        if (data.ok) {
+            card.innerHTML = `
+                <div class="card-title">Auditoria concluída</div>
+                <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 16px;">
+                    <div class="kpi primaria"><div class="kpi-numero">${data.total_findings}</div><div class="kpi-rotulo">Total</div></div>
+                    <div class="kpi critico"><div class="kpi-numero">${data.criticos}</div><div class="kpi-rotulo">Críticos</div></div>
+                    <div class="kpi alto"><div class="kpi-numero">${data.altos}</div><div class="kpi-rotulo">Altos</div></div>
+                    <div class="kpi"><div class="kpi-numero" style="color: var(--medio);">${data.medios}</div><div class="kpi-rotulo">Médios</div></div>
+                    <div class="kpi baixo"><div class="kpi-numero">${data.baixos}</div><div class="kpi-rotulo">Baixos</div></div>
+                </div>
+                <a href="${data.pdf_url}" target="_blank" class="btn btn-sucesso">📄 Abrir Relatório PDF</a>
+                <a href="/nova-auditoria" class="btn btn-secundario" style="margin-left: 8px;">Nova auditoria</a>
+            `;
+            resultado.classList.add('ativo');
+        } else {
+            card.innerHTML = `<div class="resultado-erro">❌ ${data.erro}</div>`;
+            resultado.classList.add('ativo');
+        }
+    })
+    .catch(err => {
+        overlay.classList.remove('ativo');
+        document.getElementById('btn-executar').disabled = false;
+        alert('Erro de comunicação: ' + err.message);
+    });
+}
+
+document.getElementById('cliente-select').addEventListener('change', function() {
+    document.getElementById('campo-nome-manual').style.display = this.value === 'novo' ? 'block' : 'none';
+});
+</script>
+{% endblock %}

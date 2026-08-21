@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<div class="page-header">
+    <h2>Auditorias</h2>
+    <p>Histórico completo de auditorias realizadas</p>
+</div>
+
+<div class="card">
+    {% if auditorias %}
+    <table class="tabela">
+        <thead>
+            <tr><th>Data</th><th>Cliente</th><th>Pasta auditada</th><th>Auditor</th><th>Achados</th><th>Críticos</th><th>Altos</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for a in auditorias %}
+            <tr>
+                <td>{{ a.data[:10] }}</td>
+                <td>{{ a.cliente_nome }}</td>
+                <td style="font-size: 12px; color: var(--texto-claro); max-width: 200px; overflow: hidden; text-overflow: ellipsis;">{{ a.pasta_auditada }}</td>
+                <td>{{ a.auditor }}</td>
+                <td>{{ a.total_findings }}</td>
+                <td>{% if a.criticos > 0 %}<span class="badge badge-critico">{{ a.criticos }}</span>{% else %}—{% endif %}</td>
+                <td>{% if a.altos > 0 %}<span class="badge badge-alto">{{ a.altos }}</span>{% else %}—{% endif %}</td>
+                <td class="flex">
+                    <a href="/auditorias/{{ a.id }}/pdf" target="_blank" class="btn btn-secundario" style="padding: 4px 10px; font-size: 12px;">PDF</a>
+                    <button class="btn btn-perigo" style="padding: 4px 10px; font-size: 12px;" onclick="excluir('{{ a.id }}')">Excluir</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="vazio">
+        Nenhuma auditoria registrada.<br>
+        <a href="/nova-auditoria" class="btn btn-primario mt-16">Realizar primeira auditoria</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function excluir(id) {
+    if (!confirm('Excluir esta auditoria e seus arquivos?')) return;
+    fetch(`/auditorias/${id}/excluir`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => { if (data.ok) location.reload(); });
+}
+</script>
+{% endblock %}

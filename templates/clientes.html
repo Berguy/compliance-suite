@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block conteudo %}
+<div class="page-header">
+    <h2>Clientes</h2>
+    <p>Gestão de clientes cadastrados</p>
+</div>
+
+<div class="flex justify-between" style="margin-bottom: 16px;">
+    <div></div>
+    <button class="btn btn-primario" onclick="document.getElementById('form-novo').style.display='block'">+ Novo Cliente</button>
+</div>
+
+<div class="card" id="form-novo" style="display: none; max-width: 500px;">
+    <form action="/clientes/novo" method="POST">
+        <div class="form-group">
+            <label>Nome *</label>
+            <input type="text" name="nome" required placeholder="Empresa Exemplo Ltda">
+        </div>
+        <div class="form-group">
+            <label>CNPJ</label>
+            <input type="text" name="cnpj" placeholder="00.000.000/0000-00">
+        </div>
+        <div class="form-group">
+            <label>Encarregado (DPO)</label>
+            <input type="text" name="dpo" placeholder="Nome do DPO">
+        </div>
+        <div class="form-group">
+            <label>Contato</label>
+            <input type="text" name="contato" placeholder="E-mail ou telefone">
+        </div>
+        <button type="submit" class="btn btn-sucesso">Cadastrar</button>
+        <button type="button" class="btn btn-secundario" onclick="document.getElementById('form-novo').style.display='none'">Cancelar</button>
+    </form>
+</div>
+
+<div class="card">
+    {% if clientes %}
+    <table class="tabela">
+        <thead>
+            <tr><th>Nome</th><th>CNPJ</th><th>DPO</th><th>Contato</th><th>Cadastrado em</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+            {% for c in clientes %}
+            <tr>
+                <td><strong>{{ c.nome }}</strong></td>
+                <td>{{ c.cnpj or '—' }}</td>
+                <td>{{ c.dpo or '—' }}</td>
+                <td>{{ c.contato or '—' }}</td>
+                <td style="font-size: 12px; color: var(--texto-claro);">{{ c.criado_em[:10] }}</td>
+                <td><button class="btn btn-perigo" style="padding: 4px 10px; font-size: 12px;" onclick="excluirCliente('{{ c.id }}')">Excluir</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="vazio">
+        Nenhum cliente cadastrado.<br>
+        <button class="btn btn-primario mt-16" onclick="document.getElementById('form-novo').style.display='block'">Cadastrar primeiro cliente</button>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function excluirCliente(id) {
+    if (!confirm('Excluir este cliente?')) return;
+    fetch(`/clientes/${id}/excluir`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => { if (data.ok) location.reload(); });
+}
+</script>
+{% endblock %}

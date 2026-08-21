@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Suite</title>
+    <style>
+        :root {
+            --primaria: #1a365d;
+            --secundaria: #2c5282;
+            --critico: #c53030;
+            --alto: #dd6b20;
+            --medio: #d69e2e;
+            --baixo: #38a169;
+            --fundo: #f7fafc;
+            --cartao: #ffffff;
+            --texto: #2d3748;
+            --texto-claro: #718096;
+            --divisoria: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--fundo); color: var(--texto); }
+        .layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 240px; background: var(--primaria); color: white; display: flex; flex-direction: column; position: fixed; height: 100vh; }
+        .sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar-logo h1 { font-size: 18px; font-weight: 700; }
+        .sidebar-logo p { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .sidebar-nav { flex: 1; padding: 16px 0; }
+        .sidebar-nav a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: rgba(255,255,255,0.7); text-decoration: none; font-size: 14px; transition: all 0.15s; }
+        .sidebar-nav a:hover { background: rgba(255,255,255,0.08); color: white; }
+        .sidebar-nav a.active { background: rgba(255,255,255,0.12); color: white; border-left: 3px solid #4299e1; }
+        .sidebar-nav .icone { font-size: 16px; width: 20px; text-align: center; }
+        .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 11px; color: rgba(255,255,255,0.4); }
+        .content { flex: 1; margin-left: 240px; padding: 32px; }
+        .page-header { margin-bottom: 24px; }
+        .page-header h2 { font-size: 22px; font-weight: 700; color: var(--primaria); }
+        .page-header p { font-size: 13px; color: var(--texto-claro); margin-top: 4px; }
+        .card { background: var(--cartao); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .card-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .kpi { background: var(--cartao); border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .kpi-numero { font-size: 28px; font-weight: 700; }
+        .kpi-rotulo { font-size: 12px; color: var(--texto-claro); margin-top: 4px; }
+        .kpi.critico .kpi-numero { color: var(--critico); }
+        .kpi.alto .kpi-numero { color: var(--alto); }
+        .kpi.primaria .kpi-numero { color: var(--primaria); }
+        .kpi.baixo .kpi-numero { color: var(--baixo); }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 12px; border: 1px solid var(--divisoria); border-radius: 6px; font-size: 14px; background: white; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--secundaria); box-shadow: 0 0 0 3px rgba(44,82,130,0.1); }
+        .form-group .hint { font-size: 11px; color: var(--texto-claro); margin-top: 4px; }
+        .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+        .btn-primario { background: var(--primaria); color: white; }
+        .btn-primario:hover { background: var(--secundaria); }
+        .btn-sucesso { background: var(--baixo); color: white; }
+        .btn-perigo { background: var(--critico); color: white; }
+        .btn-secundario { background: var(--divisoria); color: var(--texto); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .tabela { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tabela th { text-align: left; padding: 10px 12px; background: var(--fundo); color: var(--texto-claro); font-weight: 600; font-size: 12px; border-bottom: 1px solid var(--divisoria); }
+        .tabela td { padding: 12px; border-bottom: 1px solid var(--divisoria); }
+        .tabela tr:hover td { background: var(--fundo); }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-critico { background: #fff5f5; color: var(--critico); }
+        .badge-alto { background: #fffaf0; color: var(--alto); }
+        .badge-medio { background: #fffbeb; color: var(--medio); }
+        .badge-baixo { background: #f0fff4; color: var(--baixo); }
+        .flash { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
+        .flash-ok { background: #f0fff4; color: var(--baixo); border: 1px solid #c6f6d5; }
+        .flash-erro { background: #fff5f5; color: var(--critico); border: 1px solid #fed7d7; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; }
+        .overlay.ativo { display: flex; }
+        .overlay-box { background: white; padding: 32px 40px; border-radius: 12px; text-align: center; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--divisoria); border-top-color: var(--primaria); border-radius: 50%; animation: giro 0.8s linear infinite; margin: 0 auto 16px; }
+        @keyframes giro { to { transform: rotate(360deg); } }
+        .overlay-texto { font-size: 14px; }
+        .resultado { display: none; margin-top: 24px; }
+        .resultado.ativo { display: block; }
+        .resultado-erro { background: #fff5f5; border: 1px solid #fed7d7; color: var(--critico); padding: 16px; border-radius: 8px; font-size: 14px; }
+        .flex { display: flex; gap: 12px; align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .mt-16 { margin-top: 16px; }
+        .texto-claro { color: var(--texto-claro); font-size: 13px; }
+        .vazio { text-align: center; padding: 40px; color: var(--texto-claro); }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <nav class="sidebar">
+            <div class="sidebar-logo">
+                <h1>Compliance Suite</h1>
+                <p>LGPD / ISO 27000</p>
+            </div>
+            <div class="sidebar-nav">
+                <a href="/" class="{% if request.path == '/' %}active{% endif %}"><span class="icone">📊</span> Dashboard</a>
+                <a href="/nova-auditoria" class="{% if request.path == '/nova-auditoria' %}active{% endif %}"><span class="icone">🔍</span> Nova Auditoria</a>
+                <a href="/auditorias" class="{% if request.path == '/auditorias' %}active{% endif %}"><span class="icone">📁</span> Auditorias</a>
+                <a href="/clientes" class="{% if request.path == '/clientes' %}active{% endif %}"><span class="icone">👥</span> Clientes</a>
+            </div>
+            <div class="sidebar-footer">Compliance Suite v1.0<br>Berguy Silva</div>
+        </nav>
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for categoria, msg in messages %}
+                    <div class="flash flash-{{ categoria }}">{{ msg }}</div>
+                {% endfor %}
+            {% endwith %}
+            {% block conteudo %}{% endblock %}
+        </main>
+    </div>
+    <div class="overlay" id="overlay">
+        <div class="overlay-box">
+            <div class="spinner"></div>
+            <div class="overlay-texto" id="overlay-texto">Processando...</div>
+        </div>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

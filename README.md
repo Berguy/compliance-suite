@@ -300,17 +300,3 @@ Distribuído sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para 
 - Email: contato@berguysilva.com.br
  
 **Versão:** 1.2 · **Data:** novembro de 2026
-O que mudou nesta versão
-A tabela de variáveis de ambiente agora documenta SECRET_KEY e DEBUG, os dois nomes usados no app.py.
-Adicionada explicação de por que o modo debug deve ficar desligado fora do ambiente de desenvolvimento: ele expõe o depurador interativo do Flask, que permite executar código pelo navegador.
-Adicionado exemplo de configuração das duas variáveis em Linux/macOS e Windows PowerShell.
-Adicionada seção sobre como desligar o debug no run.bat, para quem usa o atalho no dia a dia.
-Adicionada a etapa "Modo debug por variável de ambiente" ao roadmap como concluída.
-Versão atualizada de 1.1 para 1.2.
-Pendências no repositório
-Criar o arquivo requirements.txt com flask, pillow, reportlab, pii-guard e compliance-audit via git+https.
-Criar o arquivo requirements-dev.txt com pytest e ruff.
-Criar o arquivo LICENSE com o texto MIT.
-Adicionar a pasta tests/ com conftest.py, test_app.py e test_smoke.py.
-Adicionar o arquivo pytest.ini.
-Adicionar o workflow .github/workflows/ci.yml.

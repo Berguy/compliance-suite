@@ -34,20 +34,19 @@ Dashboard / PDF ◄───────────────── relatorio
 ## Instalação
 
 ```bash
-# 1. Clonar o repositório
-git clone <url-do-repo>
+# 1. Clonar os três repositórios lado a lado
+git clone https://github.com/Berguy/compliance-suite.git
+git clone https://github.com/Berguy/pii-guard.git
 cd compliance-suite
 
-# 2. Criar ambiente virtual
+# 2. Criar e ativar ambiente virtual
 python -m venv .venv
+source .venv/Scripts/activate    # Windows (Git Bash)
+# source .venv/bin/activate      # Linux / macOS
 
-# 3. Ativar venv (Windows)
-.venv\Scripts\activate
-
-# 4. Instalar dependências
-pip install flask pillow
+# 3. Instalar dependências
+pip install flask pillow reportlab
 pip install -e ../pii-guard
-pip install -e ../compliance-audit
 
 Inicialização rápida (Windows)
 

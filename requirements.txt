@@ -1,0 +1,5 @@
+flask
+pillow
+reportlab
+pii-guard @ git+https://github.com/Berguy/pii-guard.git
+compliance-audit @ git+https://github.com/Berguy/compliance-audit.git

@@ -277,5 +277,6 @@ def salvar_configuracoes():
 
 if __name__ == "__main__":
     import webbrowser
+    debug_mode = os.environ.get("DEBUG", "1") == "1"
     webbrowser.open("http://127.0.0.1:5000")
-    app.run(debug=True, port=5000)
+    app.run(debug=debug_mode, port=5000)

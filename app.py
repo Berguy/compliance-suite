@@ -10,13 +10,18 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-from flask import (
-    Flask, render_template, request, jsonify,
-    send_file, redirect, url_for, flash,
-)
-
 from compliance_audit.engine import generate_audit_report
 from compliance_audit.generators.pdf_generator import generate_pdf
+from flask import (
+    Flask,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    send_file,
+    url_for,
+)
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "dev-only")
@@ -34,15 +39,18 @@ CLIENTES_FILE = DATA_DIR / "clientes.json"
 AUDITORIAS_FILE = DATA_DIR / "auditorias.json"
 SETTINGS_FILE = DATA_DIR / "settings.json"
 
+
 def _load_json(path):
     if path.exists():
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
     return []
 
+
 def _save_json(path, data):
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
 
 def _load_settings():
     default = {"auditor": "Berguy Silva", "escopo_padrao": "Código-fonte"}
@@ -52,8 +60,10 @@ def _load_settings():
             default.update(saved)
     return default
 
+
 def _gerar_id(prefixo):
     return f"{prefixo}-{uuid.uuid4().hex[:8]}"
+
 
 def _run_pii_guard(pasta, findings_path):
     """
@@ -86,7 +96,10 @@ def _run_pii_guard(pasta, findings_path):
 
         stdout_msg = stdout_buffer.getvalue()
         stderr_msg = stderr_buffer.getvalue()
-        return False, f"pii-guard terminou mas não gerou arquivo. stdout: {stdout_msg} | stderr: {stderr_msg}"
+        return False, (
+            f"pii-guard terminou mas não gerou arquivo. "
+            f"stdout: {stdout_msg} | stderr: {stderr_msg}"
+        )
 
     except SystemExit as e:
         # VERIFICAR ARQUIVO PRIMEIRO — mesmo com exit code != 0
@@ -98,19 +111,23 @@ def _run_pii_guard(pasta, findings_path):
         all_output = stdout_msg + stderr_msg
         return False, f"pii-guard falhou (código {e.code}): {all_output}"
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         # VERIFICAR ARQUIVO PRIMEIRO — mesmo com exceção
         if os.path.exists(findings_path):
             return True, ""
 
         stdout_msg = stdout_buffer.getvalue()
         stderr_msg = stderr_buffer.getvalue()
-        return False, f"Erro ao executar pii-guard: {str(e)}\nstdout: {stdout_msg}\nstderr: {stderr_msg}"
+        return False, (
+            f"Erro ao executar pii-guard: {e!s}\n"
+            f"stdout: {stdout_msg}\nstderr: {stderr_msg}"
+        )
 
     finally:
         sys.argv = original_argv
         sys.stdout = original_stdout
         sys.stderr = original_stderr
+
 
 @app.route("/")
 def index():
@@ -127,11 +144,13 @@ def index():
         total_altos=total_altos, settings=settings,
     )
 
+
 @app.route("/nova-auditoria")
 def nova_auditoria():
     clientes = _load_json(CLIENTES_FILE)
     settings = _load_settings()
     return render_template("nova_auditoria.html", clientes=clientes, settings=settings)
+
 
 @app.route("/api/executar-auditoria", methods=["POST"])
 def executar_auditoria():
@@ -202,14 +221,16 @@ def executar_auditoria():
             "pdf_url": f"/auditorias/{audit_id}/pdf",
         })
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         return jsonify({"ok": False, "erro": str(e)}), 500
+
 
 @app.route("/auditorias")
 def auditorias():
     auditorias = _load_json(AUDITORIAS_FILE)
     auditorias_sorted = sorted(auditorias, key=lambda x: x.get("data", ""), reverse=True)
     return render_template("auditorias.html", auditorias=auditorias_sorted)
+
 
 @app.route("/auditorias/<audit_id>/pdf")
 def baixar_pdf(audit_id):
@@ -221,6 +242,7 @@ def baixar_pdf(audit_id):
     if not os.path.exists(pdf_path):
         return "PDF não encontrado", 404
     return send_file(pdf_path, as_attachment=False, download_name=f"relatorio_{audit_id}.pdf")
+
 
 @app.route("/auditorias/<audit_id>/excluir", methods=["POST"])
 def excluir_auditoria(audit_id):
@@ -236,10 +258,12 @@ def excluir_auditoria(audit_id):
     _save_json(AUDITORIAS_FILE, auditorias)
     return jsonify({"ok": True})
 
+
 @app.route("/clientes")
 def clientes():
     clientes = _load_json(CLIENTES_FILE)
     return render_template("clientes.html", clientes=clientes)
+
 
 @app.route("/clientes/novo", methods=["POST"])
 def novo_cliente():
@@ -260,12 +284,14 @@ def novo_cliente():
     flash(f"Cliente '{cliente['nome']}' cadastrado.", "ok")
     return redirect(url_for("clientes"))
 
+
 @app.route("/clientes/<cliente_id>/excluir", methods=["POST"])
 def excluir_cliente(cliente_id):
     clientes = _load_json(CLIENTES_FILE)
     clientes = [c for c in clientes if c["id"] != cliente_id]
     _save_json(CLIENTES_FILE, clientes)
     return jsonify({"ok": True})
+
 
 @app.route("/api/configuracoes", methods=["POST"])
 def salvar_configuracoes():
@@ -274,6 +300,7 @@ def salvar_configuracoes():
     settings["escopo_padrao"] = request.json.get("escopo", settings["escopo_padrao"])
     _save_json(SETTINGS_FILE, settings)
     return jsonify({"ok": True})
+
 
 if __name__ == "__main__":
     import webbrowser

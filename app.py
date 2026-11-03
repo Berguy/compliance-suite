@@ -19,7 +19,7 @@ from compliance_audit.engine import generate_audit_report
 from compliance_audit.generators.pdf_generator import generate_pdf
 
 app = Flask(__name__)
-app.secret_key = "compliance-suite-2026"
+app.secret_key = os.environ.get("SECRET_KEY", "dev-only")
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"

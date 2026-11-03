@@ -1,29 +1,29 @@
 # Compliance Suite
- 
+
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![Flask](https://img.shields.io/badge/Flask-3.x-black)
 ![CI](https://github.com/Berguy/compliance-suite/actions/workflows/ci.yml/badge.svg)
-![Tests](https://img.shields.io/badge/tests-22%20passing-brightgreen)
- 
+![Tests](https://img.shields.io/badge/tests-23%20passing-brightgreen)
+
 **Plataforma web local para auditoria de conformidade LGPD e ISO 27001 em código-fonte.**
- 
+
 O Compliance Suite orquestra três módulos em um pipeline único: escaneia o código em busca de dados sensíveis, classifica os achados por severidade, mapeia cada um ao artigo da LGPD e ao controle da ISO 27001 correspondentes, e entrega o resultado em um dashboard com histórico e relatório em PDF.
- 
+
 ---
- 
+
 ## Por que este projeto existe
- 
+
 Auditoria de conformidade costuma ser um processo manual, caro e repetitivo: alguém abre o código, procura dados sensíveis a olho, anota o que encontrou numa planilha e tenta lembrar qual artigo da LGPD se aplica a cada achado.
- 
+
 Esse processo tem três falhas previsíveis. É lento. Não é reproduzível — duas pessoas auditando o mesmo código chegam a resultados diferentes. E não deixa rastro: quando o auditor sai, o histórico vai com ele.
- 
+
 O Compliance Suite trata auditoria como pipeline, não como tarefa artesanal. O resultado é rastreável, repetível e documentado — cada achado tem arquivo, linha, severidade, base legal e recomendação de correção.
- 
+
 ## Arquitetura
- 
+
 O sistema integra três componentes:
- 
+
 ```text
 Usuário (navegador)
        │
@@ -35,7 +35,8 @@ Flask (app.py) ──► pii-guard (scan) ──► findings.json
        │                                    │
        ▼                                    ▼
 Dashboard / PDF ◄─────────────────── relatorio.pdf
-```
+````
+
  
 **1. pii-guard** — escaneia o código-fonte em busca de secrets, credenciais e dados pessoais. Detecta 8 tipos de secret (AWS, GitHub, Google, JWT, chaves privadas, strings de conexão, senhas) e 8 tipos de PII (CPF, CNPJ, RG, e-mail, telefone, CEP, cartão de crédito, nomes).
  
@@ -214,7 +215,7 @@ pip install -r requirements-dev.txt
 pytest
 ```
  
-A suíte tem 22 testes cobrindo:
+A suíte tem 23 testes cobrindo:
  
 - Rotas de página (dashboard, nova auditoria, auditorias, clientes)
 - Cadastro e exclusão de clientes, incluindo validação de nome obrigatório
